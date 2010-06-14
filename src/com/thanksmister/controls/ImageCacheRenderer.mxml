@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ImageCache
+    version 1.0.0
+    Created by Michael Ritchie (Mister)
+	mister@thanksmister.com
+	http://www.thanksmister.com
+    
+	Simple component to cache Images loaded from URLs.  This could 
+	easily be expanded to cache any type of information loaded into 
+	the Image control. For more information, check Ely Greenfields post:
+	
+	http://www.quietlyscheming.com/blog/2007/01/29/new-flex-componentsample-superimage/
+	
+    This is release under a Creative Commons license. More information can be
+    found here: 
+    
+    http://creativecommons.org/licenses/by/2.5/
+-->
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="100%" height="100%" 
+	horizontalAlign="center" verticalAlign="middle" 
+	verticalScrollPolicy="off" horizontalScrollPolicy="off" xmlns:controls="com.thanksmister.controls.*">
+	
+	<mx:Script>
+		<![CDATA[
+			
+			private function imageComplete():void
+			{
+				trace("complete");
+			}
+			
+			private function imageError():void
+			{
+				trace('error');
+			}
+		]]>
+	</mx:Script>
+
+	<controls:ImageCache cacheLimit="200" id="image" source="{data.url}" width="100" height="100" complete="imageComplete()" ioError="imageError()" />
+
+</mx:HBox>

@@ -1,0 +1,19 @@
+<project name="Create Exportable Box2D Project" default="Copy Box2D classes to export folder">
+
+	<property name="FLEX_HOME" value="C:\Program Files\Adobe\Flex Builder 3\sdks\flex_sdk_3.4.0.9271_mpl" />
+
+	<property name="box2d.dir" value="${basedir}/src/Box2D" />
+	<property name="box2dutils.dir" value="${basedir}/src/couk/psyked/box2d" />
+
+	<target name="Copy Box2D classes to export folder">
+		<copy todir="${basedir}/export/Box2D">
+			<fileset dir="src/Box2D" />
+		</copy>
+		<copy todir="${basedir}/export/couk/psyked/box2d">
+			<fileset dir="src/couk/psyked/box2d" />
+		</copy>
+		<mkdir dir="${basedir}/export_zip" />
+		<zip destfile="${basedir}/export_zip/box2dutils.zip" basedir="${basedir}/export" />
+	</target>
+
+</project>
