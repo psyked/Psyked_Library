@@ -6,7 +6,7 @@ package couk.psyked.utils
 	import mx.events.StateChangeEvent;
 	
 	import spark.components.supportClasses.ToggleButtonBase;
-
+	
 	/**
 	 * A series of functions that should make it easier to link interactive elements
 	 * (such as buttons) in both functionality and display.
@@ -32,7 +32,7 @@ package couk.psyked.utils
 		 * @param enabledFlag
 		 * 
 		 */
-		public static function bindElement(element:ToggleButtonBase, toComponent:UIComponent, toState:String, enabledFlag:Function = null):void 
+		public static function bindElement(element:ToggleButtonBase, toComponent:UIComponent, toState:String, enabledFlag:Function = null, visibleFlag:Function = null):void 
 		{
 			element.addEventListener(MouseEvent.CLICK, onMouseClick);
 			
@@ -49,6 +49,11 @@ package couk.psyked.utils
 				if(enabledFlag != null)
 				{
 					element.enabled = enabledFlag.call();
+				}
+				if(visibleFlag != null)
+				{
+					element.visible = visibleFlag.call();
+					element.includeInLayout = visibleFlag.call();
 				}
 			}
 		}
