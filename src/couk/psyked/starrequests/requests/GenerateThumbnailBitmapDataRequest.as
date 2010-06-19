@@ -1,12 +1,12 @@
 package couk.psyked.starrequests.requests
 {
 	import cmodule.jpegencoder.CLibInit;
-	
+
 	import couk.markstar.starrequests.requests.AbstractRequest;
 	import couk.markstar.starrequests.requests.IRequest;
 	import couk.psyked.starrequests.requests.vo.GenerateThumbnailBitmapDataRequestVO;
 	import couk.psyked.utils.BitmapManager;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
@@ -16,10 +16,10 @@ package couk.psyked.starrequests.requests
 	import flash.filesystem.File;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.graphics.ImageSnapshot;
-	
+
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 
@@ -57,6 +57,7 @@ package couk.psyked.starrequests.requests
 
 			_file = file;
 			_completedSignal = new Signal( GenerateThumbnailBitmapDataRequestVO );
+			_failedSignal = new Signal( String );
 
 			_loader = new Loader();
 			_loader.contentLoaderInfo.addEventListener( ProgressEvent.PROGRESS, progressListener );
@@ -131,13 +132,20 @@ package couk.psyked.starrequests.requests
 			heightRatio = 120 / loaderInfo.content.height;
 			ratio = ( widthRatio < heightRatio ) ? widthRatio : heightRatio;
 
-			var bmd:BitmapData = BitmapManager.resampleBitmapData( ImageSnapshot.captureBitmapData( loaderInfo.content ), ratio );
-			var ba:ByteArray = new ByteArray();
-			ba = bmd.getPixels( bmd.rect );
-			ba.position = 0;
-			lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100 );
+			if ( loaderInfo.content && loaderInfo.content.width && loaderInfo.content.height )
+			{
+				var bmd:BitmapData = BitmapManager.resampleBitmapData( ImageSnapshot.captureBitmapData( loaderInfo.content ), ratio );
+				var ba:ByteArray = new ByteArray();
+				ba = bmd.getPixels( bmd.rect );
+				ba.position = 0;
+				lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100 );
 
-			returnObject.thumbnailBitmapData = bmd;
+				returnObject.thumbnailBitmapData = bmd;
+			}
+			else
+			{
+				_failedSignal.dispatch( "Invalid Bitmap Data loaded." );
+			}
 		}
 
 		internal var returnObject:GenerateThumbnailBitmapDataRequestVO;
