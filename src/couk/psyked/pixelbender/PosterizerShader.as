@@ -77,7 +77,7 @@ package couk.psyked.pixelbender
 
 		public function get color6():Array
 		{
-			return Array( data2.color6.value );
+			return new Array( data2.color6.value );
 		}
 
 		/**
@@ -90,7 +90,7 @@ package couk.psyked.pixelbender
 
 		public function get color7():Array
 		{
-			return Array( data2.color7.value );
+			return new Array( data2.color7.value );
 		}
 
 		/**
@@ -103,7 +103,7 @@ package couk.psyked.pixelbender
 
 		public function get color1():Array
 		{
-			return Array( data2.color1.value );
+			return new Array( data2.color1.value );
 		}
 
 		/**
@@ -129,7 +129,7 @@ package couk.psyked.pixelbender
 
 		public function get color2():Array
 		{
-			return Array( data2.color2.value );
+			return new Array( data2.color2.value );
 		}
 
 		/**
@@ -142,7 +142,7 @@ package couk.psyked.pixelbender
 
 		public function get color3():Array
 		{
-			return Array( data2.color3.value );
+			return new Array( data2.color3.value );
 		}
 
 		/**
@@ -155,7 +155,7 @@ package couk.psyked.pixelbender
 
 		public function get color4():Array
 		{
-			return Array( data2.color4.value );
+			return new Array( data2.color4.value );
 		}
 
 		/**
@@ -168,7 +168,7 @@ package couk.psyked.pixelbender
 
 		public function get color8():Array
 		{
-			return Array( data2.color8.value );
+			return new Array( data2.color8.value );
 		}
 
 		/**
@@ -181,7 +181,7 @@ package couk.psyked.pixelbender
 
 		public function get color5():Array
 		{
-			return Array( data2.color5.value );
+			return new Array( data2.color5.value );
 		}
 
 		/**

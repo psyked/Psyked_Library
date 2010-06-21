@@ -116,7 +116,7 @@ package couk.psyked.pixelbender
 
 		public function get ambientColor():Array
 		{
-			return Array( data2.ambientColor.value );
+			return new Array( data2.ambientColor.value );
 		}
 
 		/**
@@ -129,7 +129,7 @@ package couk.psyked.pixelbender
 
 		public function get spotColor():Array
 		{
-			return Array( data2.spotColor.value );
+			return new Array( data2.spotColor.value );
 		}
 
 		/**
@@ -142,7 +142,7 @@ package couk.psyked.pixelbender
 
 		public function get position():Array
 		{
-			return Array( data2.position.value );
+			return new Array( data2.position.value );
 		}
 
 		/**

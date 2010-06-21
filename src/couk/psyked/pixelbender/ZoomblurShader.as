@@ -77,7 +77,7 @@ package couk.psyked.pixelbender
 
 		public function get center():Array
 		{
-			return Array( data2.center.value );
+			return new Array( data2.center.value );
 		}
 
 		/**
