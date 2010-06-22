@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<database name = "databasename" folder = "">
+	
+	<tables>
+		
+		<table name = "users">
+		
+			<!-- 
+			
+				#######################
+				##### Data types: #####
+				#######################
+					
+						- INTEGER
+						- FLOAT
+						- NUMERIC
+						- REAL
+						- BOOLEAN
+						- TIME
+						- DATE
+						- TIMESTAMP
+						- VARCHAR
+						- NVARCHAR
+						- TEXT
+						- BLOB	
+			
+				#######################
+				#######################
+				
+				#######################
+				###### OPTIONS: ######
+				#######################
+						
+						- autoIncrement
+							notNull = true
+							isUnique = true
+							primaryKey = true
+						- primaryKey
+							notNull = true
+							
+				#######################
+				#######################
+				
+				#######################
+				###### DEFUAULT: ######
+				#######################
+							
+						- CURRENT_TIME
+						- CURRENT_DATE
+						- CURRENT_TIMESTAMP
+				
+				#######################
+				#######################
+			
+			-->
+			<field name = "userID" type = "INTEGER" notNull = "true" isUnique = "false" primaryKey = "true" autoIncrement = "" defualtValue = ""/>
+			<field name = "userName" type = "VARCHAR" notNull = "true" isUnique = "false" primaryKey = "false" autoIncrement = "" defualtValue = "giorgio"/>
+			<field name = "userEmail" type = "VARCHAR" notNull = "true" isUnique = "true" primaryKey = "false" autoIncrement = "" defualtValue = "aaa@aaa.it"/>
+		
+		</table>
+		
+		<table name = "images">
+			
+			<field name = "imageID" type = "INTEGER" notNull = "true" isUnique = "false" primaryKey = "true" autoIncrement = "" defualtValue = ""/>
+			<field name = "imageName" type = "VARCHAR" notNull = "true" isUnique = "false" primaryKey = "false" autoIncrement = "" defualtValue = "imma"/>
+			
+		</table>
+		
+	
+	</tables>
+
+</database>
