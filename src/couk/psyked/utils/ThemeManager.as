@@ -30,7 +30,7 @@ package couk.psyked.utils
 			try
 			{
 				//var sm:IStyleManager2 = StyleManager.getStyleManager( null ) as IStyleManager2;
-				var styleEvent:IEventDispatcher = StyleManager.getStyleManager( null ).loadStyleDeclarations( _skin, true ); // force immediate update
+				var styleEvent:IEventDispatcher = StyleManager.loadStyleDeclarations( _skin, true ); // force immediate update
 			}
 			catch ( e:* )
 			{
