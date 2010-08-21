@@ -6,15 +6,20 @@ package couk.psyked.starrequests.requests
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
+	/*import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;*/
 	import flash.net.FileReference;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import mx.collections.ArrayCollection;
+	import mx.effects.Resize;
 	import mx.graphics.ImageSnapshot;
 	import cmodule.jpegencoder.CLibInit;
 	import couk.markstar.starrequests.requests.AbstractRequest;
 	import couk.markstar.starrequests.requests.IRequest;
 	import couk.psyked.starrequests.requests.vo.GenerateThumbnailBitmapDataRequestVO;
+	import couk.psyked.starrequests.requests.vo.ResizeDeclaration;
 	import couk.psyked.utils.BitmapManager;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -34,33 +39,34 @@ package couk.psyked.starrequests.requests
 	 * If you pass a string of these commands in a syncronous queue it's a real shit for
 	 * memory consumption, but it does clean up after itself when it's done.
 	 */
-	public class GenerateThumbnailBitmapDataRequest extends AbstractRequest
+	public class ResizeImageFileRequest extends AbstractRequest
 	{
-
-		public function GenerateThumbnailBitmapDataRequest( file:FileReference, data:Object )
+		public function ResizeImageFileRequest( file:FileReference, data:ResizeDeclaration )
 		{
+			//trace( data, file.name );
 			returnObject = new GenerateThumbnailBitmapDataRequestVO();
 			returnObject.originalFile = file;
-			returnObject.data = data;
+			//returnObject.data = data.clone();
+			returnObject.resizeDeclaration = data.clone();
 
 			var alchemyEncoder:CLibInit = new CLibInit();
 			lib = alchemyEncoder.init();
 
 			baout = new ByteArray();
 
-			_file = file;
+			//_file = file;
 			_completedSignal = new Signal( GenerateThumbnailBitmapDataRequestVO );
 			_failedSignal = new Signal( String );
 
 			_loader = new Loader();
-			_loader.contentLoaderInfo.addEventListener( ProgressEvent.PROGRESS, progressListener );
-			_loader.contentLoaderInfo.addEventListener( Event.COMPLETE, completeListener );
-			_loader.contentLoaderInfo.addEventListener( IOErrorEvent.IO_ERROR, ioErrorListener );
+			_loader.contentLoaderInfo.addEventListener( ProgressEvent.PROGRESS, fileReferenceLoadProgressListener );
+			_loader.contentLoaderInfo.addEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
+			_loader.contentLoaderInfo.addEventListener( IOErrorEvent.IO_ERROR, fileReferenceLoadIOErrorListener );
 		}
 
-		protected var ALLOWED_FILE_TYPES:Array = [ "jpg", "gif", "png" ];
+		protected var ALLOWED_FILE_TYPES:Array = [ "jpg", "gif", "png", "jpeg" ];
 
-		protected var _file:FileReference;
+		//protected var _file:File;
 
 		protected var _loader:Loader;
 
@@ -68,7 +74,7 @@ package couk.psyked.starrequests.requests
 
 		protected var lib:Object;
 
-		internal var returnObject:GenerateThumbnailBitmapDataRequestVO;
+		protected var returnObject:GenerateThumbnailBitmapDataRequestVO;
 
 		override public function get completedSignal():ISignal
 		{
@@ -84,17 +90,16 @@ package couk.psyked.starrequests.requests
 			//trace( "_file.extension", _file.extension );
 			//trace( "checkArrayCollection.contains( _file.extension )", checkArrayCollection.contains( _file.extension ));
 
-			//if ( _file.extension && checkArrayCollection.contains( _file.extension.toLowerCase()))
-			if ( _file.type && checkArrayCollection.contains( _file.type.toLowerCase()))
+			//if ( returnObject.originalFile.extension && checkArrayCollection.contains( returnObject.originalFile.extension.toLowerCase()))
+			if ( returnObject.originalFile.type && checkArrayCollection.contains( returnObject.originalFile.type.toLowerCase()))
 			{
-				if ( !_file.data )
+				if ( !returnObject.originalFile.data )
 				{
-					_loader.load( new URLRequest( _file["url"] ));
+					_loader.load( new URLRequest( returnObject.originalFile[ "url" ]));
 				}
 				else
 				{
-					//_loader.load();
-					_file.load();
+					returnObject.originalFile.load();
 				}
 			}
 			else
@@ -107,18 +112,19 @@ package couk.psyked.starrequests.requests
 		{
 			super.cleanup();
 
-			_loader.contentLoaderInfo.removeEventListener( ProgressEvent.PROGRESS, progressListener );
-			_loader.contentLoaderInfo.removeEventListener( Event.COMPLETE, completeListener );
-			_loader.contentLoaderInfo.removeEventListener( IOErrorEvent.IO_ERROR, ioErrorListener );
+			_loader.contentLoaderInfo.removeEventListener( ProgressEvent.PROGRESS, fileReferenceLoadProgressListener );
+			_loader.contentLoaderInfo.removeEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
+			_loader.contentLoaderInfo.removeEventListener( IOErrorEvent.IO_ERROR, fileReferenceLoadIOErrorListener );
 			_loader = null;
 		}
 
 		/**
 		 * @private
 		 */
-		protected function completeListener( e:Event ):void
+		protected function fileReferenceLoadCompleteListener( e:Event ):void
 		{
-			//trace( "completeListener", e );
+			trace( "completeListener", e );
+			trace( returnObject.originalFile.name );
 			var loaderInfo:LoaderInfo = LoaderInfo( e.currentTarget );
 
 			baout = new ByteArray();
@@ -127,8 +133,8 @@ package couk.psyked.starrequests.requests
 			var heightRatio:Number;
 			var ratio:Number;
 
-			widthRatio = 120 / loaderInfo.content.width;
-			heightRatio = 120 / loaderInfo.content.height;
+			widthRatio = returnObject.resizeDeclaration.maxWidth / loaderInfo.content.width;
+			heightRatio = returnObject.resizeDeclaration.maxHeight / loaderInfo.content.height;
 			ratio = ( widthRatio < heightRatio ) ? widthRatio : heightRatio;
 
 			if ( loaderInfo.content && loaderInfo.content.width && loaderInfo.content.height )
@@ -150,9 +156,9 @@ package couk.psyked.starrequests.requests
 		/**
 		 * @private
 		 */
-		protected function ioErrorListener( e:IOErrorEvent ):void
+		protected function fileReferenceLoadIOErrorListener( e:IOErrorEvent ):void
 		{
-			//trace( "ioErrorListener", e );
+			trace( "ioErrorListener", e );
 			_failedSignal.dispatch( e.text );
 			cleanup();
 		}
@@ -160,19 +166,28 @@ package couk.psyked.starrequests.requests
 		/**
 		 * @private
 		 */
-		protected function progressListener( e:ProgressEvent ):void
+		protected function fileReferenceLoadProgressListener( e:ProgressEvent ):void
 		{
-			//trace( "progressListener", e );
+			trace( "progressListener", e );
 			_progressSignal.dispatch( e.bytesLoaded / e.bytesTotal );
 		}
 
 		private function alchemyEncodingCompleteFunction( ba:ByteArray ):void
 		{
 			//trace( "alchemyEncodingCompleteFunction", ba );
-			_progressSignal.dispatch( 1 );
-
+			//trace( ResizeDeclaration( returnObject.data ).newFilename );
+			//trace( returnObject.originalFile.name );
+			//trace( ResizeDeclaration( returnObject.data ).newFilename );
 			returnObject.thumbnailByteArray = ba;
 
+			/*var location:File = File.documentsDirectory.resolvePath( "ImageSizer Output Files/" + returnObject.resizeDeclaration.newFilename );
+			//trace( location.url, location.nativePath );
+			var fs:FileStream = new FileStream();
+			fs.open( location, FileMode.WRITE );
+			fs.writeBytes( ba );
+			fs.close();*/
+
+			_progressSignal.dispatch( 1 );
 			_completedSignal.dispatch( returnObject );
 			cleanup();
 		}

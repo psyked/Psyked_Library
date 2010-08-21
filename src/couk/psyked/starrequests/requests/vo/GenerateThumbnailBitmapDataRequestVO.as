@@ -1,14 +1,42 @@
 package couk.psyked.starrequests.requests.vo
 {
 	import flash.display.BitmapData;
-	import flash.filesystem.File;
+	import flash.net.FileReference;
 	import flash.utils.ByteArray;
 
+	/**
+	 * Return object for the image resampling / encoding functions, that contains
+	 * ByteArray, BitmapData, File objects, and unspecified data objects for the 
+	 * original command.
+	 * 
+	 * @author James
+	 */
 	public class GenerateThumbnailBitmapDataRequestVO
 	{
+		/**
+		 * 
+		 * @default 
+		 */
 		public var thumbnailByteArray:ByteArray;
+		/**
+		 * 
+		 * @default 
+		 */
 		public var thumbnailBitmapData:BitmapData;
-		public var originalFile:File;
+		/**
+		 * 
+		 * @default 
+		 */
+		public var originalFile:FileReference;
+		/**
+		 * 
+		 * @default 
+		 */
 		public var data:Object;
+		/**
+		 * 
+		 * @default 
+		 */
+		public var resizeDeclaration:ResizeDeclaration;
 	}
 }
