@@ -93,7 +93,7 @@ package couk.psyked.starrequests.requests
 			//trace( "_file.extension", _file.extension );
 			//trace( "checkArrayCollection.contains( _file.extension )", checkArrayCollection.contains( _file.extension ));
 
-			trace( "returnObject.originalFile.type =", returnObject.originalFile.type );
+			//trace( "returnObject.originalFile.type =", returnObject.originalFile.type );
 
 			//
 			// Note: File type returns the extension with a "." included - whereas extension doesn't use the same.
