@@ -42,6 +42,12 @@ package couk.psyked.starrequests.requests
 	{
 		public function ResizeImageFileRequest( file:FileReference, data:ResizeDeclaration )
 		{
+
+			var alchemyEncoder:CLibInit = new CLibInit();
+			lib = alchemyEncoder.init();
+
+			baout = new ByteArray();
+			
 			//trace( data, file.name );
 			returnObject = new ResizeImageFileRequestVO();
 			returnObject.originalFile = file;
@@ -81,11 +87,6 @@ package couk.psyked.starrequests.requests
 		override public function send():void
 		{
 			super.send();
-
-			var alchemyEncoder:CLibInit = new CLibInit();
-			lib = alchemyEncoder.init();
-
-			baout = new ByteArray();
 
 			var checkArrayCollection:ArrayCollection = new ArrayCollection( ALLOWED_FILE_TYPES );
 
@@ -161,7 +162,7 @@ package couk.psyked.starrequests.requests
 			returnObject.originalFile.removeEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
 			returnObject.originalFile.removeEventListener( IOErrorEvent.IO_ERROR, loadIOErrorListener );
 			returnObject = null;
-			lib = null;
+			//lib = null;
 		}
 
 		/**
