@@ -11,7 +11,7 @@ package couk.psyked.starrequests.requests.vo
 	 * 
 	 * @author James
 	 */
-	public class GenerateThumbnailBitmapDataRequestVO
+	public class ResizeImageFileRequestVO
 	{
 		/**
 		 * 

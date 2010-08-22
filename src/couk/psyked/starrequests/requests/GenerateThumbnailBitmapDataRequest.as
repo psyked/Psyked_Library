@@ -14,7 +14,7 @@ package couk.psyked.starrequests.requests
 	import cmodule.jpegencoder.CLibInit;
 	import couk.markstar.starrequests.requests.AbstractRequest;
 	import couk.markstar.starrequests.requests.IRequest;
-	import couk.psyked.starrequests.requests.vo.GenerateThumbnailBitmapDataRequestVO;
+	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
 	import couk.psyked.utils.BitmapManager;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -39,7 +39,7 @@ package couk.psyked.starrequests.requests
 
 		public function GenerateThumbnailBitmapDataRequest( file:FileReference, data:Object )
 		{
-			returnObject = new GenerateThumbnailBitmapDataRequestVO();
+			returnObject = new ResizeImageFileRequestVO();
 			returnObject.originalFile = file;
 			returnObject.data = data;
 
@@ -49,7 +49,7 @@ package couk.psyked.starrequests.requests
 			baout = new ByteArray();
 
 			_file = file;
-			_completedSignal = new Signal( GenerateThumbnailBitmapDataRequestVO );
+			_completedSignal = new Signal( ResizeImageFileRequestVO );
 			_failedSignal = new Signal( String );
 
 			_loader = new Loader();
@@ -68,7 +68,7 @@ package couk.psyked.starrequests.requests
 
 		protected var lib:Object;
 
-		internal var returnObject:GenerateThumbnailBitmapDataRequestVO;
+		internal var returnObject:ResizeImageFileRequestVO;
 
 		override public function get completedSignal():ISignal
 		{
