@@ -6,6 +6,8 @@ package couk.psyked.starrequests.requests
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
+	import flash.geom.Matrix;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.net.FileReference;
 	import flash.net.URLRequest;
@@ -16,8 +18,8 @@ package couk.psyked.starrequests.requests
 	import cmodule.jpegencoder.CLibInit;
 	import couk.markstar.starrequests.requests.AbstractRequest;
 	import couk.markstar.starrequests.requests.IRequest;
-	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
 	import couk.psyked.starrequests.requests.vo.ResizeDeclaration;
+	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
 	import couk.psyked.utils.BitmapManager;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -47,7 +49,7 @@ package couk.psyked.starrequests.requests
 			lib = alchemyEncoder.init();
 
 			baout = new ByteArray();
-			
+
 			//trace( data, file.name );
 			returnObject = new ResizeImageFileRequestVO();
 			returnObject.originalFile = file;
@@ -209,6 +211,68 @@ package couk.psyked.starrequests.requests
 
 			baout = new ByteArray();
 
+			//var matrix:Matrix = new Matrix( 1, 0, 0, 1, 0, 0 );
+			var matrix:Matrix = new Matrix();
+			var rawbmd:BitmapData = ImageSnapshot.captureBitmapData( loaderInfo.content );
+			var matriximage:BitmapData;
+			//
+			// work out how we're going to rotate the bitmapdata.
+			//
+			trace( loaderInfo.content.width, loaderInfo.content.height );
+
+			if ( loaderInfo.content.width > loaderInfo.content.height )
+			{
+				// is landscape
+				if ( returnObject.resizeDeclaration.forceRotateToPortrait )
+				{
+					trace( "Forcing rotation to portrait" );
+					//matrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 )
+					//matrix.createBox( 1, 1, 0, 0, 0 );
+					//matrix.translate( -loaderInfo.content.height / 2, -loaderInfo.content.width / 2 );
+					// point? var point:Point = new Point( 70, 70 );
+					/*var point:Point = new Point( loaderInfo.content.width / 2, loaderInfo.content.height / 2 );
+					   matrix.tx -= point.x;
+					   matrix.ty -= point.y;
+					   matrix.rotate( 90 * ( Math.PI / 180 ));
+					   matrix.tx += point.y;
+					 matrix.ty += point.x;*/
+
+					//var point:Point = new Point( loaderInfo.content.width / 2, loaderInfo.content.height / 2 );
+
+					//var matrix:Matrix = new Matrix();
+					matrix.translate( -rawbmd.width / 2, -rawbmd.height / 2 );
+					matrix.rotate( 90 * ( Math.PI / 180 ));
+					matrix.translate( rawbmd.height / 2, rawbmd.width / 2 );
+					matriximage = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
+					matriximage.draw( rawbmd, matrix );
+						//matrix.translate( loaderInfo.content.height / 2, loaderInfo.content.width / 2 );
+						//matrix.createBox( 1, 1, Math.PI / 4, 0,0);
+				}
+			}
+			else if ( loaderInfo.content.width < loaderInfo.content.height )
+			{
+				// is portrait
+				if ( returnObject.resizeDeclaration.forceRotateToLandscape )
+				{
+					trace( "Forcing rotation to landscape" );
+					matrix.translate( -rawbmd.width / 2, -rawbmd.height / 2 );
+					matrix.rotate( 90 * ( Math.PI / 180 ));
+					matrix.translate( rawbmd.height / 2, rawbmd.width / 2 );
+					matriximage = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
+					matriximage.draw( rawbmd, matrix );
+				}
+			}
+			else
+			{
+				// is square
+			}
+
+			//loaderInfo.content.transform.matrix = matrix;
+			if ( !matriximage )
+			{
+				matriximage = rawbmd;
+			}
+			var rawBitmapData:BitmapData = ImageSnapshot.captureBitmapData( matriximage );
 			//
 			// work out the resizing and transformations we need to apply to the loader object bitmapdata
 			//
@@ -216,8 +280,8 @@ package couk.psyked.starrequests.requests
 			var heightRatio:Number;
 			var ratio:Number;
 
-			widthRatio = returnObject.resizeDeclaration.maxWidth / loaderInfo.content.width;
-			heightRatio = returnObject.resizeDeclaration.maxHeight / loaderInfo.content.height;
+			widthRatio = returnObject.resizeDeclaration.maxWidth / rawBitmapData.width;
+			heightRatio = returnObject.resizeDeclaration.maxHeight / rawBitmapData.height;
 			ratio = ( widthRatio < heightRatio ) ? widthRatio : heightRatio;
 
 			trace( "Resizing bitmapdata by " + ( ratio * 100 ) + "%" );
@@ -225,12 +289,12 @@ package couk.psyked.starrequests.requests
 			//
 			// check if the loaded image data has valid dimensions
 			//
-			if ( loaderInfo.content && loaderInfo.content.width && loaderInfo.content.height )
+			if ( rawBitmapData && rawBitmapData.width && rawBitmapData.height )
 			{
 				//
 				// resize the bitmapdata up/down to the target dimensions
 				//
-				var bmd:BitmapData = BitmapManager.resampleBitmapData( ImageSnapshot.captureBitmapData( loaderInfo.content ), ratio );
+				var bmd:BitmapData = BitmapManager.resampleBitmapData( rawBitmapData, ratio );
 
 				//
 				// create the output objects and start encoding
@@ -239,6 +303,7 @@ package couk.psyked.starrequests.requests
 				var newRect:Rectangle = new Rectangle( 0, 0, returnObject.resizeDeclaration.maxWidth, returnObject.resizeDeclaration.maxHeight );
 
 				ba = bmd.getPixels( newRect );
+				//ba = bmd.getPixels( bmd.rect );
 				ba.position = 0;
 				lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100 );
 
