@@ -1,5 +1,6 @@
 package couk.psyked.starrequests.requests.vo
 {
+	import flash.net.FileReference;
 
 	public class ResizeDeclaration
 	{
@@ -24,9 +25,12 @@ package couk.psyked.starrequests.requests.vo
 
 		public var name:String;
 
-		public var newFilename:String;
-
 		public var rotateToBestFit:Boolean;
+
+		/**
+		 * The angle of rotation for the images.  Currently built for 90 degree increments. 
+		 */
+		public var rotation:int;
 
 		public function clone():ResizeDeclaration
 		{
@@ -38,8 +42,8 @@ package couk.psyked.starrequests.requests.vo
 			rtn.maxWidth = this.maxWidth;
 			rtn.minHeight = this.minHeight;
 			rtn.minWidth = this.minWidth;
+			rtn.rotation = this.rotation;
 			rtn.name = this.name;
-			rtn.newFilename = this.newFilename;
 			rtn.rotateToBestFit = this.rotateToBestFit;
 			return rtn;
 		}

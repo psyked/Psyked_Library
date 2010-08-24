@@ -44,36 +44,24 @@ package couk.psyked.starrequests.requests
 	{
 		public function ResizeImageFileRequest( file:FileReference, data:ResizeDeclaration )
 		{
-
 			var alchemyEncoder:CLibInit = new CLibInit();
 			lib = alchemyEncoder.init();
 
 			baout = new ByteArray();
 
-			//trace( data, file.name );
 			returnObject = new ResizeImageFileRequestVO();
 			returnObject.originalFile = file;
 			returnObject.originalFile.addEventListener( ProgressEvent.PROGRESS, fileReferenceLoadProgressListener );
 			returnObject.originalFile.addEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
 			returnObject.originalFile.addEventListener( IOErrorEvent.IO_ERROR, loadIOErrorListener );
-			//returnObject.data = data.clone();
 			returnObject.resizeDeclaration = data.clone();
+			returnObject.rotation = data.rotation;
 
-			//_file = file;
 			_completedSignal = new Signal( ResizeImageFileRequestVO );
 			_failedSignal = new Signal( String );
-
-		/*_loader = new Loader();
-		   _loader.contentLoaderInfo.addEventListener( ProgressEvent.PROGRESS, fileReferenceLoadProgressListener );
-		   _loader.contentLoaderInfo.addEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
-		 _loader.contentLoaderInfo.addEventListener( IOErrorEvent.IO_ERROR, fileReferenceLoadIOErrorListener );*/
 		}
 
 		protected var ALLOWED_FILE_TYPES:Array = [ "jpg", "gif", "png", "jpeg" ];
-
-		//protected var _file:File;
-
-		//protected var _loader:Loader;
 
 		protected var baout:ByteArray;
 
@@ -109,15 +97,7 @@ package couk.psyked.starrequests.requests
 				//
 				// if the filetype is supported
 				//
-				/*if ( !returnObject.originalFile.data )
-				   {
-				   // if the file data is not already loaded
-				   _loader.load( new URLRequest( returnObject.originalFile[ "url" ]));
-				   }
-				   else
-				 {*/
 				returnObject.originalFile.load();
-				/*}*/
 			}
 			else
 			{
@@ -140,31 +120,18 @@ package couk.psyked.starrequests.requests
 			//
 			returnObject.thumbnailByteArray = ba;
 
-			/*var location:File = File.documentsDirectory.resolvePath( "ImageSizer Output Files/" + returnObject.resizeDeclaration.newFilename );
-			   //trace( location.url, location.nativePath );
-			   var fs:FileStream = new FileStream();
-			   fs.open( location, FileMode.WRITE );
-			   fs.writeBytes( ba );
-			 fs.close();*/
-
 			_progressSignal.dispatch( 1 );
 			_completedSignal.dispatch( returnObject );
-			//cleanup();
 		}
 
 		override protected function cleanup():void
 		{
 			super.cleanup();
 
-			/*			_loader.contentLoaderInfo.removeEventListener( ProgressEvent.PROGRESS, fileReferenceLoadProgressListener );
-			   _loader.contentLoaderInfo.removeEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
-			   _loader.contentLoaderInfo.removeEventListener( IOErrorEvent.IO_ERROR, fileReferenceLoadIOErrorListener );
-			 _loader = null;*/
 			returnObject.originalFile.removeEventListener( ProgressEvent.PROGRESS, fileReferenceLoadProgressListener );
 			returnObject.originalFile.removeEventListener( Event.COMPLETE, fileReferenceLoadCompleteListener );
 			returnObject.originalFile.removeEventListener( IOErrorEvent.IO_ERROR, loadIOErrorListener );
 			returnObject = null;
-			//lib = null;
 		}
 
 		/**
@@ -175,9 +142,6 @@ package couk.psyked.starrequests.requests
 		 */
 		protected function fileReferenceLoadCompleteListener( e:Event ):void
 		{
-			//trace( "completeListener", e );
-			//trace( returnObject.originalFile.name );
-			//var loaderInfo:LoaderInfo = LoaderInfo( e.currentTarget );
 			var fileRef:FileReference = FileReference( e.currentTarget );
 			var loader:Loader = new Loader();
 			loader.contentLoaderInfo.addEventListener( Event.COMPLETE, loaderLoadCompleteListener );
@@ -211,10 +175,53 @@ package couk.psyked.starrequests.requests
 
 			baout = new ByteArray();
 
-			//var matrix:Matrix = new Matrix( 1, 0, 0, 1, 0, 0 );
 			var matrix:Matrix = new Matrix();
 			var rawbmd:BitmapData = ImageSnapshot.captureBitmapData( loaderInfo.content );
-			var matriximage:BitmapData;
+			var manualTransformedBitmapData:BitmapData;
+			var finalTransformedBitmapData:BitmapData;
+
+			trace( "returnObject.rotation =", returnObject.rotation );
+
+			if ( returnObject.rotation )
+			{
+				trace( "Manually rotating the image by " + returnObject.rotation + " degrees" );
+				//var centrePoint:Point = new Point( rawbmd.width / 2, rawbmd.height / 2 );
+				matrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 );
+				matrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
+				loaderInfo.content.transform.matrix = matrix;
+				matrix.translate( loaderInfo.content.width / 2, loaderInfo.content.height / 2 );
+				/*var centrePoint:Point = new Point( rawbmd.width / 2, rawbmd.height / 2 );
+				   matrix.translate( -centrePoint.x, -centrePoint.y );
+				   matrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
+				 matrix.translate( centrePoint.x, centrePoint.y );*/
+				//matrix.translate( rawbmd.width / 2, rawbmd.height / 2 );
+
+				//trace(loaderInfo.content.getBounds(loaderInfo.content));
+				//todo: Need to work out dimensions of new bitmapdata with transformation applied.
+				//trace( rawbmd.width, rawbmd.height, bounds.width, bounds.height );
+				/*if ( returnObject.rotation == 0 || returnObject.rotation == 180 || returnObject.rotation == -180 )
+				   {
+				   manualTransformedBitmapData = new BitmapData( rawbmd.width, rawbmd.height, false, 0x00000000 );
+				   }
+				   else
+				   {
+				   manualTransformedBitmapData = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
+				 }*/
+				//var bounds:Rectangle = loaderInfo.content.getRect( loaderInfo.content );
+				//trace( "Raw:", rawbmd.width, rawbmd.height, "Bounds:", bounds.width, bounds.height );
+				manualTransformedBitmapData = new BitmapData( loaderInfo.content.width, loaderInfo.content.height, false, 0x00000000 );
+				/*var newmatrix:Matrix = new Matrix();
+				   newmatrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 );
+				   newmatrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
+				   newmatrix.translate( loaderInfo.content.height / 2, loaderInfo.content.width / 2 );
+				 manualTransformedBitmapData.draw( rawbmd, newmatrix );*/
+				trace( "matrix", matrix );
+				manualTransformedBitmapData.draw( rawbmd, matrix );
+				//manualTransformedBitmapData.draw( loaderInfo.content );
+				//trace( manualTransformedBitmapData.width, manualTransformedBitmapData.height );
+				rawbmd = manualTransformedBitmapData.clone();
+				matrix = new Matrix();
+			}
 			//
 			// work out how we're going to rotate the bitmapdata.
 			//
@@ -226,27 +233,11 @@ package couk.psyked.starrequests.requests
 				if ( returnObject.resizeDeclaration.forceRotateToPortrait )
 				{
 					trace( "Forcing rotation to portrait" );
-					//matrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 )
-					//matrix.createBox( 1, 1, 0, 0, 0 );
-					//matrix.translate( -loaderInfo.content.height / 2, -loaderInfo.content.width / 2 );
-					// point? var point:Point = new Point( 70, 70 );
-					/*var point:Point = new Point( loaderInfo.content.width / 2, loaderInfo.content.height / 2 );
-					   matrix.tx -= point.x;
-					   matrix.ty -= point.y;
-					   matrix.rotate( 90 * ( Math.PI / 180 ));
-					   matrix.tx += point.y;
-					 matrix.ty += point.x;*/
-
-					//var point:Point = new Point( loaderInfo.content.width / 2, loaderInfo.content.height / 2 );
-
-					//var matrix:Matrix = new Matrix();
 					matrix.translate( -rawbmd.width / 2, -rawbmd.height / 2 );
 					matrix.rotate( 90 * ( Math.PI / 180 ));
 					matrix.translate( rawbmd.height / 2, rawbmd.width / 2 );
-					matriximage = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
-					matriximage.draw( rawbmd, matrix );
-						//matrix.translate( loaderInfo.content.height / 2, loaderInfo.content.width / 2 );
-						//matrix.createBox( 1, 1, Math.PI / 4, 0,0);
+					finalTransformedBitmapData = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
+					finalTransformedBitmapData.draw( rawbmd, matrix );
 				}
 			}
 			else if ( loaderInfo.content.width < loaderInfo.content.height )
@@ -258,8 +249,8 @@ package couk.psyked.starrequests.requests
 					matrix.translate( -rawbmd.width / 2, -rawbmd.height / 2 );
 					matrix.rotate( 90 * ( Math.PI / 180 ));
 					matrix.translate( rawbmd.height / 2, rawbmd.width / 2 );
-					matriximage = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
-					matriximage.draw( rawbmd, matrix );
+					finalTransformedBitmapData = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
+					finalTransformedBitmapData.draw( rawbmd, matrix );
 				}
 			}
 			else
@@ -268,11 +259,11 @@ package couk.psyked.starrequests.requests
 			}
 
 			//loaderInfo.content.transform.matrix = matrix;
-			if ( !matriximage )
+			if ( !finalTransformedBitmapData )
 			{
-				matriximage = rawbmd;
+				finalTransformedBitmapData = rawbmd;
 			}
-			var rawBitmapData:BitmapData = ImageSnapshot.captureBitmapData( matriximage );
+			var rawBitmapData:BitmapData = ImageSnapshot.captureBitmapData( finalTransformedBitmapData );
 			//
 			// work out the resizing and transformations we need to apply to the loader object bitmapdata
 			//

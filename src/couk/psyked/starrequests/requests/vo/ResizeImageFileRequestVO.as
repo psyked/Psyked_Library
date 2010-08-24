@@ -13,30 +13,11 @@ package couk.psyked.starrequests.requests.vo
 	 */
 	public class ResizeImageFileRequestVO
 	{
-		/**
-		 * 
-		 * @default 
-		 */
 		public var thumbnailByteArray:ByteArray;
-		/**
-		 * 
-		 * @default 
-		 */
 		public var thumbnailBitmapData:BitmapData;
-		/**
-		 * 
-		 * @default 
-		 */
 		public var originalFile:FileReference;
-		/**
-		 * 
-		 * @default 
-		 */
 		public var data:Object;
-		/**
-		 * 
-		 * @default 
-		 */
 		public var resizeDeclaration:ResizeDeclaration;
+		public var rotation:int;
 	}
 }
