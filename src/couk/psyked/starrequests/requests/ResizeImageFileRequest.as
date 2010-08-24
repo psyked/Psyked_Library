@@ -180,11 +180,11 @@ package couk.psyked.starrequests.requests
 			var manualTransformedBitmapData:BitmapData;
 			var finalTransformedBitmapData:BitmapData;
 
-			trace( "returnObject.rotation =", returnObject.rotation );
+			//trace( "returnObject.rotation =", returnObject.rotation );
 
 			if ( returnObject.rotation )
 			{
-				trace( "Manually rotating the image by " + returnObject.rotation + " degrees" );
+				//trace( "Manually rotating the image by " + returnObject.rotation + " degrees" );
 				//var centrePoint:Point = new Point( rawbmd.width / 2, rawbmd.height / 2 );
 				matrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 );
 				matrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
@@ -215,7 +215,7 @@ package couk.psyked.starrequests.requests
 				   newmatrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
 				   newmatrix.translate( loaderInfo.content.height / 2, loaderInfo.content.width / 2 );
 				 manualTransformedBitmapData.draw( rawbmd, newmatrix );*/
-				trace( "matrix", matrix );
+				//trace( "matrix", matrix );
 				manualTransformedBitmapData.draw( rawbmd, matrix );
 				//manualTransformedBitmapData.draw( loaderInfo.content );
 				//trace( manualTransformedBitmapData.width, manualTransformedBitmapData.height );
@@ -225,14 +225,14 @@ package couk.psyked.starrequests.requests
 			//
 			// work out how we're going to rotate the bitmapdata.
 			//
-			trace( loaderInfo.content.width, loaderInfo.content.height );
+			//trace( loaderInfo.content.width, loaderInfo.content.height );
 
 			if ( loaderInfo.content.width > loaderInfo.content.height )
 			{
 				// is landscape
 				if ( returnObject.resizeDeclaration.forceRotateToPortrait )
 				{
-					trace( "Forcing rotation to portrait" );
+					//trace( "Forcing rotation to portrait" );
 					matrix.translate( -rawbmd.width / 2, -rawbmd.height / 2 );
 					matrix.rotate( 90 * ( Math.PI / 180 ));
 					matrix.translate( rawbmd.height / 2, rawbmd.width / 2 );
@@ -245,7 +245,7 @@ package couk.psyked.starrequests.requests
 				// is portrait
 				if ( returnObject.resizeDeclaration.forceRotateToLandscape )
 				{
-					trace( "Forcing rotation to landscape" );
+					//trace( "Forcing rotation to landscape" );
 					matrix.translate( -rawbmd.width / 2, -rawbmd.height / 2 );
 					matrix.rotate( 90 * ( Math.PI / 180 ));
 					matrix.translate( rawbmd.height / 2, rawbmd.width / 2 );
@@ -275,7 +275,7 @@ package couk.psyked.starrequests.requests
 			heightRatio = returnObject.resizeDeclaration.maxHeight / rawBitmapData.height;
 			ratio = ( widthRatio < heightRatio ) ? widthRatio : heightRatio;
 
-			trace( "Resizing bitmapdata by " + ( ratio * 100 ) + "%" );
+			//trace( "Resizing bitmapdata by " + ( ratio * 100 ) + "%" );
 
 			//
 			// check if the loaded image data has valid dimensions
