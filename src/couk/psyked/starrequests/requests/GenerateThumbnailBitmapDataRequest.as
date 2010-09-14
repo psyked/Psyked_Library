@@ -1,5 +1,11 @@
 package couk.psyked.starrequests.requests
 {
+	import cmodule.aircall.CLibInit;
+	
+	import couk.markstar.starrequests.requests.AbstractRequest;
+	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
+	import couk.psyked.utils.BitmapManager;
+	
 	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
@@ -9,13 +15,10 @@ package couk.psyked.starrequests.requests
 	import flash.net.FileReference;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.collections.ArrayCollection;
 	import mx.graphics.ImageSnapshot;
-	import cmodule.jpegencoder.CLibInit;
-	import couk.markstar.starrequests.requests.AbstractRequest;
-	import couk.markstar.starrequests.requests.IRequest;
-	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
-	import couk.psyked.utils.BitmapManager;
+	
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 
@@ -137,7 +140,7 @@ package couk.psyked.starrequests.requests
 				var ba:ByteArray = new ByteArray();
 				ba = bmd.getPixels( bmd.rect );
 				ba.position = 0;
-				lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100 );
+				lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100 , 10);
 
 				returnObject.thumbnailBitmapData = bmd;
 			}
@@ -174,6 +177,9 @@ package couk.psyked.starrequests.requests
 			returnObject.thumbnailByteArray = ba;
 
 			_completedSignal.dispatch( returnObject );
+			
+			ba.clear();
+			baout.position = 0;
 			cleanup();
 		}
 	}
