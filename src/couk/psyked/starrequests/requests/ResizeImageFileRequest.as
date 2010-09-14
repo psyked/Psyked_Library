@@ -1,5 +1,14 @@
 package couk.psyked.starrequests.requests
 {
+	import cmodule.aircall.CLibInit;
+	import cmodule.aircall.MState;
+	import cmodule.aircall.gstate;
+	
+	import couk.markstar.starrequests.requests.AbstractRequest;
+	import couk.psyked.starrequests.requests.vo.ResizeDeclaration;
+	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
+	import couk.psyked.utils.BitmapManager;
+	
 	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
@@ -7,23 +16,15 @@ package couk.psyked.starrequests.requests
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.geom.Matrix;
-	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.net.FileReference;
-	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.collections.ArrayCollection;
-	import mx.effects.Resize;
 	import mx.graphics.ImageSnapshot;
-	import cmodule.jpegencoder.CLibInit;
-	import couk.markstar.starrequests.requests.AbstractRequest;
-	import couk.markstar.starrequests.requests.IRequest;
-	import couk.psyked.starrequests.requests.vo.ResizeDeclaration;
-	import couk.psyked.starrequests.requests.vo.ResizeImageFileRequestVO;
-	import couk.psyked.utils.BitmapManager;
+	
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
-	import spark.primitives.Rect;
 
 	/**
 	 * The idea behind this class is that it would be more efficient to display a
@@ -44,8 +45,8 @@ package couk.psyked.starrequests.requests
 	{
 		public function ResizeImageFileRequest( file:FileReference, data:ResizeDeclaration )
 		{
-			var alchemyEncoder:CLibInit = new CLibInit();
-			lib = alchemyEncoder.init();
+			init = new CLibInit();
+			lib = init.init();
 
 			baout = new ByteArray();
 
@@ -63,7 +64,11 @@ package couk.psyked.starrequests.requests
 
 		protected var ALLOWED_FILE_TYPES:Array = [ "jpg", "gif", "png", "jpeg" ];
 
+		protected var ba:ByteArray;
+
 		protected var baout:ByteArray;
+
+		protected var init:CLibInit;
 
 		protected var lib:Object;
 
@@ -109,16 +114,20 @@ package couk.psyked.starrequests.requests
 			}
 		}
 
-		protected function alchemyEncodingCompleteFunction( ba:ByteArray ):void
+		protected function alchemyEncodingCompleteFunction(out:ByteArray):void
 		{
-			//trace( "alchemyEncodingCompleteFunction" );
+			trace( "alchemyEncodingCompleteFunction" );
 			//trace( ResizeDeclaration( returnObject.data ).newFilename );
 			//trace( returnObject.originalFile.name );
 			//trace( ResizeDeclaration( returnObject.data ).newFilename );
+			baout.position = 0;
 			//
 			// copy the resized, encoded bytearray data into the return object
 			//
-			returnObject.thumbnailByteArray = ba;
+			returnObject.thumbnailByteArray = new ByteArray();
+			returnObject.thumbnailByteArray.writeBytes( baout );
+
+			ba.clear();
 
 			_progressSignal.dispatch( 1 );
 			_completedSignal.dispatch( returnObject );
@@ -173,8 +182,6 @@ package couk.psyked.starrequests.requests
 		{
 			var loaderInfo:LoaderInfo = ( e.currentTarget as LoaderInfo );
 
-			baout = new ByteArray();
-
 			var matrix:Matrix = new Matrix();
 			var rawbmd:BitmapData = ImageSnapshot.captureBitmapData( loaderInfo.content );
 			var manualTransformedBitmapData:BitmapData;
@@ -185,43 +192,17 @@ package couk.psyked.starrequests.requests
 			if ( returnObject.rotation )
 			{
 				//trace( "Manually rotating the image by " + returnObject.rotation + " degrees" );
-				//var centrePoint:Point = new Point( rawbmd.width / 2, rawbmd.height / 2 );
 				matrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 );
 				matrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
 				loaderInfo.content.transform.matrix = matrix;
 				matrix.translate( loaderInfo.content.width / 2, loaderInfo.content.height / 2 );
-				/*var centrePoint:Point = new Point( rawbmd.width / 2, rawbmd.height / 2 );
-				   matrix.translate( -centrePoint.x, -centrePoint.y );
-				   matrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
-				 matrix.translate( centrePoint.x, centrePoint.y );*/
-				//matrix.translate( rawbmd.width / 2, rawbmd.height / 2 );
-
-				//trace(loaderInfo.content.getBounds(loaderInfo.content));
-				//todo: Need to work out dimensions of new bitmapdata with transformation applied.
-				//trace( rawbmd.width, rawbmd.height, bounds.width, bounds.height );
-				/*if ( returnObject.rotation == 0 || returnObject.rotation == 180 || returnObject.rotation == -180 )
-				   {
-				   manualTransformedBitmapData = new BitmapData( rawbmd.width, rawbmd.height, false, 0x00000000 );
-				   }
-				   else
-				   {
-				   manualTransformedBitmapData = new BitmapData( rawbmd.height, rawbmd.width, false, 0x00000000 );
-				 }*/
-				//var bounds:Rectangle = loaderInfo.content.getRect( loaderInfo.content );
 				//trace( "Raw:", rawbmd.width, rawbmd.height, "Bounds:", bounds.width, bounds.height );
 				manualTransformedBitmapData = new BitmapData( loaderInfo.content.width, loaderInfo.content.height, false, 0x00000000 );
-				/*var newmatrix:Matrix = new Matrix();
-				   newmatrix.translate( -loaderInfo.content.width / 2, -loaderInfo.content.height / 2 );
-				   newmatrix.rotate( returnObject.rotation * ( Math.PI / 180 ));
-				   newmatrix.translate( loaderInfo.content.height / 2, loaderInfo.content.width / 2 );
-				 manualTransformedBitmapData.draw( rawbmd, newmatrix );*/
-				//trace( "matrix", matrix );
 				manualTransformedBitmapData.draw( rawbmd, matrix );
-				//manualTransformedBitmapData.draw( loaderInfo.content );
-				//trace( manualTransformedBitmapData.width, manualTransformedBitmapData.height );
 				rawbmd = manualTransformedBitmapData.clone();
 				matrix = new Matrix();
 			}
+
 			//
 			// work out how we're going to rotate the bitmapdata.
 			//
@@ -290,18 +271,37 @@ package couk.psyked.starrequests.requests
 				//
 				// create the output objects and start encoding
 				//
-				var ba:ByteArray = new ByteArray();
-				var newRect:Rectangle = new Rectangle( 0, 0, returnObject.resizeDeclaration.maxWidth, returnObject.resizeDeclaration.maxHeight );
+				ba = new ByteArray();
+				//var newRect:Rectangle = new Rectangle( 0, 0, returnObject.resizeDeclaration.maxWidth, returnObject.resizeDeclaration.maxHeight );
 
-				ba = bmd.getPixels( newRect );
+				trace( bmd.rect );
+				ba = bmd.getPixels( bmd.rect );
+
 				//ba = bmd.getPixels( bmd.rect );
 				ba.position = 0;
-				lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100 );
 
+				//var alchemyEncoder:CLibInit = new CLibInit();
+				//lib = alchemyEncoder.init();
+
+				if ( baout )
+				{
+					baout.clear();
+				}
+				else
+				{
+					baout = new ByteArray();
+				}
+				//trace( bmd.width, bmd.height );
+				//trace( ba, baout, bmd );
+				lib.encodeAsync( alchemyEncodingCompleteFunction, ba, baout, bmd.width, bmd.height, 100, 100 );
+				//lib.encode( ba, baout, bmd.width, bmd.height, 85 );
+				//ba.clear();
+				//trace( baout.length );
+				//alchemyEncodingCompleteFunction( baout );
 				//
 				// copy the resized bitmapdata into the return object
 				//
-				returnObject.thumbnailBitmapData = bmd;
+				returnObject.thumbnailBitmapData = bmd.clone();
 			}
 			else
 			{

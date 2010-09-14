@@ -15,15 +15,15 @@ package couk.psyked.starrequests.requests.vo
 
 		public var forceRotateToPortrait:Boolean;
 
-		public var maxHeight:int;
+		public var maxHeight:int = 400;
 
-		public var maxWidth:int;
+		public var maxWidth:int = 600;
 
 		public var minHeight:int;
 
 		public var minWidth:int;
 
-		public var name:String;
+		public var name:String = "Default Resize action";
 
 		public var rotateToBestFit:Boolean;
 
